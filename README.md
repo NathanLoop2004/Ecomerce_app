@@ -45,6 +45,7 @@ npm start
 | `/main` | estática | Home: carrusel de categorías, grilla de productos, marquee del catálogo y filas por categoría con scroll infinito |
 | `/main/[id]` | dinámica | Detalle del producto con galería deslizable |
 | `/main/carrito` | estática | Carrito completo con resumen y medios de pago |
+| `/main/favoritos` | estática | Los productos marcados con el corazón |
 | `/products` | dinámica | Catálogo con búsqueda, filtro por categoría y paginación |
 | `/categories` | estática | Las 24 categorías |
 
@@ -52,7 +53,9 @@ El redirect de `/` está en `next.config.ts` y no en un componente: los redirect
 
 Quedó en `permanent: false` (307) a propósito. Con 308 el navegador cachea el redirect para siempre y cambiar la home después se vuelve un problema.
 
-`/main/carrito` convive con la ruta dinámica `/main/[id]`: Next resuelve los segmentos estáticos primero, así que no se pisan.
+`/main/carrito` y `/main/favoritos` conviven con la ruta dinámica `/main/[id]`: Next resuelve los segmentos estáticos primero, así que no se pisan. El día que exista un producto con id `carrito`, gana la ruta estática.
+
+Ninguna de las dos está en el nav principal. Se llega al carrito desde el panel del header y a favoritos desde el corazón con contador, al lado del toggle de tema.
 
 ---
 
@@ -64,7 +67,7 @@ src/
 ├── components/
 │   ├── cart/               panel, página, botón agregar, medios de pago
 │   ├── categories/         carrusel, listado, título
-│   ├── favorites/          botón de corazón
+│   ├── favorites/          botón de corazón, enlace del header, listado
 │   ├── footer/
 │   ├── header/             nav, drawer mobile, links
 │   ├── products/           card, grilla, filas, marquee, galería, búsqueda, paginación
@@ -218,13 +221,13 @@ Carrito y favoritos sobreviven al refresh mediante **listener middlewares de Red
 | `cart` | `ecommerce_app.cart` | items completos con cantidad |
 | `favorites` | `ecommerce_app.favorites` | solo los ids |
 
-De favoritos se guardan **solo ids**: si se guardara el producto entero, un precio que cambie en la API quedaría congelado en el navegador del usuario.
+De favoritos se guardan **solo ids**: si se guardara el producto entero, un precio que cambie en la API quedaría congelado en el navegador del usuario. La página de favoritos reconstruye los productos cruzando esos ids contra el catálogo cacheado, así que mostrar los favoritos no cuesta ninguna petición extra.
 
 Al leer, cada item se valida con un type guard. Un `localStorage` manipulado o de una versión vieja del esquema inyectaría objetos rotos que revientan al renderizar.
 
-**El estado no se precarga en `makeStore`.** El servidor siempre renderiza el carrito vacío; si el cliente arrancara leyendo `localStorage`, el primer render no coincidiría con el HTML servido y habría error de hidratación. `StoreProvider` despacha la hidratación en un efecto, después del montaje.
+**El estado no se precarga en `makeStore`.** El servidor siempre renderiza el carrito y los favoritos vacíos; si el cliente arrancara leyendo `localStorage`, el primer render no coincidiría con el HTML servido y habría error de hidratación. `StoreProvider` despacha la hidratación en un efecto, después del montaje.
 
-La página del carrito usa un flag `hydrated` para mostrar skeletons en vez del estado vacío mientras eso ocurre.
+Los dos slices llevan un flag `hydrated` para que las páginas muestren skeletons en vez del estado vacío mientras eso ocurre. Sin él, entrar directo a `/main/carrito` o `/main/favoritos` mostraría "está vacío" por un instante aunque tuvieras cosas guardadas.
 
 ---
 

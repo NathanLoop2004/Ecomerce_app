@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Store } from "lucide-react";
 import { Cart } from "@/components/cart";
+import { FavoritesLink } from "@/components/favorites";
 import { ThemeToggle } from "@/components/theme";
 import Nav from "./Nav";
 import MobileDrawer from "./MobileDrawer";
@@ -26,6 +27,7 @@ export default function Header() {
 
         <div className="flex items-center justify-end gap-1">
           <ThemeToggle />
+          <FavoritesLink />
           <Cart />
         </div>
       </nav>

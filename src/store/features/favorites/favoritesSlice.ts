@@ -2,10 +2,12 @@ import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
 
 type FavoritesState = {
   ids: string[];
+  hydrated: boolean;
 };
 
 const initialState: FavoritesState = {
   ids: [],
+  hydrated: false,
 };
 
 const favoritesSlice = createSlice({
@@ -26,10 +28,12 @@ const favoritesSlice = createSlice({
     },
     hydrateFavorites(state, action: PayloadAction<string[]>) {
       state.ids = action.payload;
+      state.hydrated = true;
     },
   },
   selectors: {
     selectFavoriteIds: (state) => state.ids,
+    selectFavoritesHydrated: (state) => state.hydrated,
     selectFavoritesCount: (state) => state.ids.length,
   },
 });
@@ -41,7 +45,10 @@ export const {
   hydrateFavorites,
 } = favoritesSlice.actions;
 
-export const { selectFavoriteIds, selectFavoritesCount } =
-  favoritesSlice.selectors;
+export const {
+  selectFavoriteIds,
+  selectFavoritesHydrated,
+  selectFavoritesCount,
+} = favoritesSlice.selectors;
 
 export default favoritesSlice.reducer;

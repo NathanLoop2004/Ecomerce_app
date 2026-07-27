@@ -18,10 +18,7 @@ export default function StoreProvider({
   useEffect(() => {
     store.dispatch(hydrateCart(loadCartItems()));
 
-    const favorites = loadFavoriteIds();
-    if (favorites.length > 0) {
-      store.dispatch(hydrateFavorites(favorites));
-    }
+    store.dispatch(hydrateFavorites(loadFavoriteIds()));
   }, [store]);
 
   return <Provider store={store}>{children}</Provider>;
