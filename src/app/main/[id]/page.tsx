@@ -17,7 +17,15 @@ import type { LucideIcon } from "lucide-react";
 import type { AvailabilityStatus } from "@/interfaces";
 import { AddToCartButton } from "@/components/cart";
 import { ProductGallery } from "@/components/products";
-import { getProductById } from "@/services/products";
+import { getProductById, getProductIds } from "@/services/products";
+
+export const revalidate = 3600;
+
+export async function generateStaticParams() {
+  const ids = await getProductIds();
+
+  return ids.map((id) => ({ id: String(id) }));
+}
 
 const priceFormatter = new Intl.NumberFormat("en-US", {
   style: "currency",
