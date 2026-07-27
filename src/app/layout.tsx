@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import StoreProvider from "@/store/StoreProvider";
+import { Header } from "@/components/header";
+import { Footer } from "@/components/footer";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -29,7 +31,16 @@ export default function RootLayout({
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
-        <StoreProvider>{children}</StoreProvider>
+        <link rel="preconnect" href="https://cdn.dummyjson.com" />
+        <link rel="dns-prefetch" href="https://cdn.dummyjson.com" />
+
+        <StoreProvider>
+          <Header />
+          <main className="flex flex-1 flex-col bg-zinc-50 dark:bg-black">
+            {children}
+          </main>
+          <Footer />
+        </StoreProvider>
       </body>
     </html>
   );

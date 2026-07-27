@@ -51,3 +51,20 @@ export type ProductSelection<TField extends ProductField> = Pick<
   Product,
   TField | "id"
 >;
+
+export type ProductSummaryField =
+  | "title"
+  | "price"
+  | "thumbnail"
+  | "brand"
+  | "rating"
+  | "discountPercentage"
+  | "availabilityStatus"
+  | "category";
+
+export type ProductSummary = ProductSelection<ProductSummaryField>;
+
+export type CartableProduct = Pick<
+  Product,
+  "id" | "title" | "price" | "thumbnail" | "availabilityStatus"
+>;

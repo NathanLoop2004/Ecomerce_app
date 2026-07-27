@@ -1,7 +1,7 @@
 import { configureStore } from "@reduxjs/toolkit";
-import cartReducer from "./features/cart/cartSlice";
-import { cartPersistenceMiddleware } from "./middleware/cartPersistence";
-import { productsApi } from "./api/productsApi";
+import cartReducer from "./features/cart/cartSlice.ts";
+import { cartPersistenceMiddleware } from "./middleware/cartPersistence.ts";
+import { productsApi } from "./api/productsApi.ts";
 
 export const makeStore = () =>
   configureStore({
