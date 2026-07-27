@@ -2,7 +2,8 @@
 
 import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
-import { Minus, Plus, ShoppingCart, Trash2, X } from "lucide-react";
+import Link from "next/link";
+import { ArrowRight, Minus, Plus, ShoppingCart, Trash2, X } from "lucide-react";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import {
   clearCart,
@@ -115,7 +116,10 @@ export default function Cart() {
               ))}
             </ul>
 
-            <CartFooter subtotal={subtotal} />
+            <CartFooter
+              subtotal={subtotal}
+              onNavigate={() => setIsOpen(false)}
+            />
           </>
         )}
       </div>
@@ -197,12 +201,18 @@ function CartRow({ item }: { item: CartItem }) {
   );
 }
 
-function CartFooter({ subtotal }: { subtotal: number }) {
+function CartFooter({
+  subtotal,
+  onNavigate,
+}: {
+  subtotal: number;
+  onNavigate: () => void;
+}) {
   const dispatch = useAppDispatch();
 
   return (
-    <div className="border-t border-zinc-200 p-4 dark:border-zinc-800">
-      <div className="mb-3 flex items-baseline justify-between">
+    <div className="flex flex-col gap-2 border-t border-zinc-200 p-4 dark:border-zinc-800">
+      <div className="mb-1 flex items-baseline justify-between">
         <span className="text-sm text-zinc-500 dark:text-zinc-400">
           Subtotal
         </span>
@@ -210,6 +220,16 @@ function CartFooter({ subtotal }: { subtotal: number }) {
           {priceFormatter.format(subtotal)}
         </span>
       </div>
+
+      <Link
+        href="/main/carrito"
+        onClick={onNavigate}
+        className="flex w-full items-center justify-center gap-2 rounded-md bg-zinc-900 px-3 py-2 text-sm font-medium text-white transition duration-200 ease-out hover:bg-zinc-700 active:scale-95 motion-reduce:transition-none motion-reduce:active:scale-100 dark:bg-white dark:text-zinc-900 dark:hover:bg-zinc-200"
+      >
+        Seguir comprando
+        <ArrowRight size={15} aria-hidden="true" />
+      </Link>
+
       <button
         type="button"
         onClick={() => dispatch(clearCart())}

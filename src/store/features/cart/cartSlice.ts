@@ -10,10 +10,12 @@ export type CartItem = {
 
 type CartState = {
   items: CartItem[];
+  hydrated: boolean;
 };
 
 const initialState: CartState = {
   items: [],
+  hydrated: false,
 };
 
 const cartSlice = createSlice({
@@ -52,10 +54,12 @@ const cartSlice = createSlice({
     },
     hydrateCart(state, action: PayloadAction<CartItem[]>) {
       state.items = action.payload;
+      state.hydrated = true;
     },
   },
   selectors: {
     selectItems: (state) => state.items,
+    selectIsHydrated: (state) => state.hydrated,
     selectCount: (state) =>
       state.items.reduce((total, item) => total + item.quantity, 0),
     selectSubtotal: (state) =>
@@ -66,6 +70,11 @@ const cartSlice = createSlice({
 export const { addItem, removeItem, setQuantity, clearCart, hydrateCart } =
   cartSlice.actions;
 
-export const { selectItems, selectCount, selectSubtotal } = cartSlice.selectors;
+export const {
+  selectItems,
+  selectIsHydrated,
+  selectCount,
+  selectSubtotal,
+} = cartSlice.selectors;
 
 export default cartSlice.reducer;
