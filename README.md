@@ -123,6 +123,36 @@ Las listas usan `select` en la API:
 
 Antes se traía el producto completo —`reviews`, `meta`, `dimensions`— para pintar una card que usa 8 campos. El tipo `ProductSummary` refleja eso, así que TypeScript impide pasarle a la card datos que no pidió.
 
+### La búsqueda tiene debounce de 300 ms
+
+El input navega solo, 300 ms después de la última tecla, con `router.replace`. Se usa `replace` y no `push` para que cada pausa al escribir no deje una entrada en el historial: volver atrás desde `/products` te devuelve a la ruta anterior, no a los seis estados intermedios de lo que tipeaste.
+
+El botón y la tecla Enter siguen navegando en el momento, sin esperar los 300 ms.
+
+**`ProductSearch` no puede llevar `key={search}`.** Lo llevaba: servía para resetear el input cuando la URL cambiaba desde afuera. Con debounce eso lo rompe todo, porque cada navegación remonta el componente y el input pierde el foco a media palabra. En su lugar hay un ref `lastPushed` con el último término que el componente mismo mandó a la URL: si `initialSearch` llega distinto de ese valor, el cambio vino de afuera (un enlace de categoría) y el input se sincroniza; si coincide, es el eco de la propia navegación y no se toca. Sin eso, seguir escribiendo durante la navegación pisaba las letras nuevas con el término viejo.
+
+### El estado de productos vive en Redux, vía RTK Query
+
+No hay un slice `products` escrito a mano. El estado está en `productsApi.reducer`, dentro del mismo store, y `useProductQuery` lo expone con los nombres que pide la consigna:
+
+| Consigna | Equivalente |
+|---|---|
+| `items` | `products` |
+| `status` (idle/loading/succeeded/failed) | `isLoading`, `isFetching`, `isError` |
+| `error` | `errorMessage` |
+| `page` | `skip` / `limit` (la página vive en la URL, no en el store) |
+| `hasMore` | `total` contra `skip + limit` |
+
+La página se deja en la URL a propósito: así una búsqueda o una página concreta se puede compartir por link y sobrevive al refresh, algo que un contador en memoria no da.
+
+### Pull to refresh: solo con el dedo
+
+`PullToRefresh` escucha `touchstart`/`touchmove`/`touchend` y dispara el `refetch` de RTK Query al soltar después de 64 px de arrastre. **No tiene equivalente con mouse**, porque el gesto no existe en escritorio; para probarlo hay que usar un teléfono o el modo dispositivo de las DevTools. En escritorio el camino equivalente es el botón "Reintentar" del estado de error.
+
+`html` lleva `overscroll-behavior-y: contain`. Sin eso, Chrome en Android se queda con el gesto y recarga la página entera antes de que nuestro handler llegue a correr.
+
+No hace falta `preventDefault()` en el `touchmove`: React registra esos listeners como pasivos y no dejaría, pero tampoco es necesario, porque con `overscroll-behavior` contenido el arrastre en `scrollY === 0` ya no mueve el documento.
+
 ### La búsqueda filtra en el cliente
 
 La API tiene `/products/search?q=`, pero **busca en título y descripción**:
@@ -148,13 +178,37 @@ Toda interacción —navegar, hacer click, traer datos— tiene que estar bajo 3
 
 ```
 /main         mediana  4 ms      /main/carrito   mediana  3 ms
-/products     mediana 10 ms      /main/[id]      mediana 12 ms
+/products     mediana 10 ms      /main/[id]      mediana  5 ms
 ```
 
 Lo que no baja de ahí es la API de DummyJSON: **~230 ms** por petición, latencia de red pura. Por eso todo lo anticipable se precarga:
 
 - `preconnect` a la API y al CDN de imágenes. La primera llamada pasó de 868 ms a 347 ms: más de 500 ms eran handshake TLS.
 - `usePrefetch` de RTK Query en la paginación (precarga la página siguiente y la anterior) y en el hover de los enlaces de categoría. Pasar de página pasó de 225 ms a **1 ms**.
+
+### `/main/[id]` se prerenderiza en el build, no a pedido
+
+Era una ruta dinámica (`ƒ`), y eso costaba dos veces:
+
+```
+prefetch del <Link>   220 bytes   <- vacío: Next no prefetchea rutas dinámicas sin loading.js
+RSC en frío           229-869 ms  <- el primero que entraba a cada producto pagaba la API
+```
+
+Con `generateStaticParams` sobre los 194 ids del catálogo la ruta pasa a `●` (SSG + ISR con `revalidate = 3600`):
+
+| | antes | ahora |
+|---|---|---|
+| prefetch del `<Link>` | 220 bytes (vacío) | **28 KB** en 5 ms |
+| RSC en frío | 229–869 ms | **5 ms** |
+| HTML, primera carga | 240 ms | **5 ms** |
+| peticiones a la API en runtime | 1 por id no cacheado | **0** |
+
+Las 194 páginas se generan en 2.7 s con 10 workers. El click deja de disparar trabajo: el payload ya está en memoria del navegador cuando la card entra en pantalla.
+
+`dynamicParams` queda en `true` (el default): si la API agrega un producto 195, esa ruta se renderiza a pedido y queda cacheada en vez de dar 404. El costo es que un id inexistente cuesta ~500 ms antes del 404, porque va a preguntarle a la API.
+
+**No se le agrega `loading.tsx`.** En una ruta estática empeora las cosas: Next pasa de prefetchear la página entera a prefetchear solo hasta el boundary del loading, y apaga el TTL del caché de cliente. Además rompe el `notFound()`, que es el problema documentado más abajo.
 
 ---
 
@@ -214,6 +268,8 @@ Por eso las bandas destacadas usan marquee automático y no scroll manual.
 
 ## Persistencia
 
+La consigna pedía `AsyncStorage`, que es una API de **React Native** y no existe en el navegador. `localStorage` es el equivalente en web y es lo que se usa acá: misma idea (clave-valor persistente por origen), API sincrónica en vez de basada en promesas.
+
 Carrito y favoritos sobreviven al refresh mediante **listener middlewares de Redux** que escriben en `localStorage`:
 
 | Slice | Clave | Qué guarda |
@@ -265,7 +321,9 @@ Primera visita sin preferencia guardada: usa la del sistema operativo. Una vez q
 ## Limitaciones conocidas
 
 - **No hay checkout real.** El botón "Pagar" avisa que no hay pasarela conectada. Los distintivos de Visa, Mastercard, Bancard y AMEX están dibujados con CSS, no son logos oficiales.
-- **`/main` y `/categories` perdieron el render en servidor de los datos.** Al mover el catálogo a RTK Query, los productos ya no viajan en el HTML: se ve el skeleton y llegan al ejecutar el JS. Es el precio del caché en Redux y afecta al SEO de esas dos rutas. `/main/[id]`, que es la que se comparte e indexa, sigue renderizándose en el servidor.
+- **`/main` y `/categories` perdieron el render en servidor de los datos.** Al mover el catálogo a RTK Query, los productos ya no viajan en el HTML: se ve el skeleton y llegan al ejecutar el JS. Es el precio del caché en Redux y afecta al SEO de esas dos rutas. `/main/[id]`, que es la que se comparte e indexa, se prerenderiza completa en el build.
+- **La paginación es Anterior/Siguiente, no infinite scroll ni "Cargar más".** Es paginación real contra la API (`limit`/`skip`) y el número de página vive en la URL, así que una página concreta se puede compartir. Pero no es ninguno de los dos patrones que enumera la consigna.
+- **El pull to refresh no funciona con mouse.** Es un gesto táctil; en escritorio hay que usar el modo dispositivo de las DevTools.
 - **El `<title>` sigue siendo "Create Next App"**, el metadata por defecto de create-next-app.
 - **`globals.css` fuerza `font-family: Arial`** en el `body`, así que las fuentes Geist que carga el layout no se aplican. Viene del template.
 - **Las bandas de color usan `w-screen` (100vw)**, que incluye el ancho de la barra de scroll. No desborda porque `<main>` tiene `overflow-x-clip`; si se saca esa clase, aparece scroll horizontal.

@@ -12,8 +12,10 @@ export type ProductQueryResult = {
   products: ProductSummary[];
   total: number;
   isLoading: boolean;
+  isFetching: boolean;
   isError: boolean;
   errorMessage?: string;
+  refetch: () => Promise<unknown>;
 };
 
 export function useProductQuery({
@@ -50,11 +52,13 @@ export function useProductQuery({
       products: matches.slice(skip, skip + limit),
       total: matches.length,
       isLoading: catalog.isLoading,
+      isFetching: catalog.isFetching,
       isError: catalog.isError,
       errorMessage:
         catalog.error && "message" in catalog.error
           ? catalog.error.message
           : undefined,
+      refetch: catalog.refetch,
     };
   }
 
@@ -62,8 +66,10 @@ export function useProductQuery({
     products: paged.data?.products ?? [],
     total: paged.data?.total ?? 0,
     isLoading: paged.isLoading,
+    isFetching: paged.isFetching,
     isError: paged.isError,
     errorMessage:
       paged.error && "message" in paged.error ? paged.error.message : undefined,
+    refetch: paged.refetch,
   };
 }

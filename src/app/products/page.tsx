@@ -41,11 +41,7 @@ export default async function ProductsPage(props: PageProps<"/products">) {
         <ProductCount {...query} />
       </div>
 
-      <ProductSearch
-        key={search ?? ""}
-        initialSearch={search ?? ""}
-        category={selected}
-      />
+      <ProductSearch initialSearch={search ?? ""} category={selected} />
 
       {selected && (
         <Link

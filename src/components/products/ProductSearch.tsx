@@ -1,9 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Search, X } from "lucide-react";
 import { productsApi } from "@/store/api/productsApi";
+
+const DEBOUNCE_MS = 300;
 
 export default function ProductSearch({
   initialSearch = "",
@@ -15,26 +17,54 @@ export default function ProductSearch({
   const router = useRouter();
   const prefetchCatalog = productsApi.usePrefetch("getAllProducts");
   const [value, setValue] = useState(initialSearch);
+  const lastPushed = useRef(initialSearch);
 
-  const goToSearch = (term: string) => {
-    const params = new URLSearchParams();
-    if (term) params.set("q", term);
-    if (category) params.set("category", category);
+  const goToSearch = useCallback(
+    (term: string) => {
+      const params = new URLSearchParams();
+      if (term) params.set("q", term);
+      if (category) params.set("category", category);
 
-    const queryString = params.toString();
-    router.push(queryString ? `/products?${queryString}` : "/products");
-  };
+      const queryString = params.toString();
+      router.replace(queryString ? `/products?${queryString}` : "/products");
+    },
+    [router, category],
+  );
 
-  const handleClear = () => {
-    setValue("");
-    if (initialSearch) goToSearch("");
+  useEffect(() => {
+    if (initialSearch === lastPushed.current) return;
+
+    lastPushed.current = initialSearch;
+    setValue(initialSearch);
+  }, [initialSearch]);
+
+  useEffect(() => {
+    const term = value.trim();
+
+    if (term === lastPushed.current) return;
+
+    const timer = setTimeout(() => {
+      lastPushed.current = term;
+      goToSearch(term);
+    }, DEBOUNCE_MS);
+
+    return () => clearTimeout(timer);
+  }, [value, goToSearch]);
+
+  const submitNow = () => {
+    const term = value.trim();
+
+    if (term === lastPushed.current) return;
+
+    lastPushed.current = term;
+    goToSearch(term);
   };
 
   return (
     <form
       onSubmit={(event) => {
         event.preventDefault();
-        goToSearch(value.trim());
+        submitNow();
       }}
       role="search"
       className="mb-6 flex gap-2"
@@ -60,7 +90,7 @@ export default function ProductSearch({
         {value && (
           <button
             type="button"
-            onClick={handleClear}
+            onClick={() => setValue("")}
             aria-label="Limpiar búsqueda"
             className="absolute right-3 top-1/2 -translate-y-1/2 rounded p-0.5 text-zinc-400 transition-colors hover:text-zinc-700 dark:hover:text-zinc-200"
           >

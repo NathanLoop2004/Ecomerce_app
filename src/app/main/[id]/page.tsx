@@ -16,6 +16,7 @@ import {
 import type { LucideIcon } from "lucide-react";
 import type { AvailabilityStatus } from "@/interfaces";
 import { AddToCartButton } from "@/components/cart";
+import { FavoriteButton } from "@/components/favorites";
 import { ProductGallery } from "@/components/products";
 import { getProductById, getProductIds } from "@/services/products";
 
@@ -127,8 +128,13 @@ export default async function ProductDetailPage(
             {product.description}
           </p>
 
-          <div className="max-w-xs">
+          <div className="flex max-w-xs flex-col gap-2">
             <AddToCartButton product={product} />
+            <FavoriteButton
+              productId={String(product.id)}
+              title={product.title}
+              variant="full"
+            />
           </div>
 
           <dl className="grid grid-cols-2 gap-x-6 gap-y-3 border-t border-zinc-200 pt-5 text-sm dark:border-zinc-800">
