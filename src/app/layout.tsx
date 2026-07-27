@@ -38,7 +38,7 @@ export default function RootLayout({
 
         <StoreProvider>
           <Header />
-          <main className="flex flex-1 flex-col bg-zinc-50 dark:bg-black">
+          <main className="flex w-full min-w-0 flex-1 flex-col overflow-x-clip bg-zinc-50 dark:bg-black">
             {children}
           </main>
           <Footer />

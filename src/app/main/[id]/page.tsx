@@ -1,4 +1,3 @@
-import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import {
@@ -17,6 +16,7 @@ import {
 import type { LucideIcon } from "lucide-react";
 import type { AvailabilityStatus } from "@/interfaces";
 import { AddToCartButton } from "@/components/cart";
+import { ProductGallery } from "@/components/products";
 import { getProductById } from "@/services/products";
 
 const priceFormatter = new Intl.NumberFormat("en-US", {
@@ -62,37 +62,12 @@ export default async function ProductDetailPage(
       </Link>
 
       <div className="grid gap-10 lg:grid-cols-2">
-        <div className="flex flex-col gap-4">
-          <div className="relative aspect-square overflow-hidden rounded-xl border border-zinc-200 bg-linear-to-br from-zinc-50 to-zinc-200 dark:border-zinc-800 dark:from-zinc-800 dark:to-zinc-950">
-            <Image
-              src={product.images[0] ?? product.thumbnail}
-              alt={product.title}
-              fill
-              sizes="(max-width: 1024px) 100vw, 50vw"
-              priority
-              className="object-contain p-8"
-            />
-          </div>
-
-          {product.images.length > 1 && (
-            <div className="grid grid-cols-4 gap-3">
-              {product.images.slice(0, 4).map((image) => (
-                <div
-                  key={image}
-                  className="relative aspect-square overflow-hidden rounded-lg border border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-900"
-                >
-                  <Image
-                    src={image}
-                    alt={product.title}
-                    fill
-                    sizes="15vw"
-                    className="object-contain p-2"
-                  />
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
+        <ProductGallery
+          images={
+            product.images.length > 0 ? product.images : [product.thumbnail]
+          }
+          title={product.title}
+        />
 
         <div className="flex flex-col gap-5">
           <div className="flex flex-col gap-2">

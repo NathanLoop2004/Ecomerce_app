@@ -1,3 +1,7 @@
+export { default as ProductMarquee } from "./ProductMarquee";
+export { default as ProductRow } from "./ProductRow";
+export { default as CategoryRows } from "./CategoryRows";
+export { default as ProductGallery } from "./ProductGallery";
 export { default as ProductCard } from "./ProductCard";
 export { default as ProductCount } from "./ProductCount";
 export { default as ProductGrid } from "./ProductGrid";

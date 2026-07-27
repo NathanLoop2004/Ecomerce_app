@@ -14,8 +14,7 @@ export default async function ProductsPage(props: PageProps<"/products">) {
   const { category, page, q } = await props.searchParams;
 
   const search = typeof q === "string" && q.trim() ? q.trim() : undefined;
-  const selected =
-    !search && typeof category === "string" ? category : undefined;
+  const selected = typeof category === "string" ? category : undefined;
 
   const parsedPage = Number(typeof page === "string" ? page : 1);
   const currentPage =
@@ -33,21 +32,28 @@ export default async function ProductsPage(props: PageProps<"/products">) {
       <div className="mb-6 flex flex-wrap items-baseline justify-between gap-2">
         <h1 className="flex items-center gap-2 text-2xl font-semibold text-zinc-900 dark:text-zinc-100">
           <Package size={22} aria-hidden="true" />
-          {search ? `Resultados para «${search}»` : null}
-          {!search && <CategoryTitle slug={selected} />}
+          {search ? (
+            `Resultados para «${search}»`
+          ) : (
+            <CategoryTitle slug={selected} />
+          )}
         </h1>
         <ProductCount {...query} />
       </div>
 
-      <ProductSearch initialSearch={search ?? ""} limit={PAGE_SIZE} />
+      <ProductSearch
+        key={search ?? ""}
+        initialSearch={search ?? ""}
+        category={selected}
+      />
 
       {selected && (
         <Link
-          href="/products"
+          href={search ? { pathname: "/products", query: { q: search } } : "/products"}
           className="mb-6 inline-flex items-center gap-1.5 rounded-full bg-zinc-100 px-3 py-1.5 text-sm text-zinc-600 transition-colors hover:bg-zinc-200 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-700"
         >
           <X size={14} aria-hidden="true" />
-          Quitar filtro
+          <CategoryTitle slug={selected} />
         </Link>
       )}
 
