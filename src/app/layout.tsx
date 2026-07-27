@@ -31,7 +31,9 @@ export default function RootLayout({
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
+        <link rel="preconnect" href="https://dummyjson.com" />
         <link rel="preconnect" href="https://cdn.dummyjson.com" />
+        <link rel="dns-prefetch" href="https://dummyjson.com" />
         <link rel="dns-prefetch" href="https://cdn.dummyjson.com" />
 
         <StoreProvider>

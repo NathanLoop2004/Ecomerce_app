@@ -3,23 +3,13 @@
 import Link from "next/link";
 import { ArrowRight, Tag } from "lucide-react";
 import { useGetCategoriesQuery } from "@/store/api/productsApi";
-
-const PLACEHOLDER_COUNT = 12;
+import { CategoryGridSkeleton } from "@/components/skeleton";
 
 export default function CategoryList() {
   const { data, isLoading, isError } = useGetCategoriesQuery();
 
   if (isLoading) {
-    return (
-      <ul className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
-        {Array.from({ length: PLACEHOLDER_COUNT }, (_, index) => (
-          <li
-            key={index}
-            className="h-28 animate-pulse rounded-xl bg-zinc-100 dark:bg-zinc-800"
-          />
-        ))}
-      </ul>
-    );
+    return <CategoryGridSkeleton />;
   }
 
   if (isError) {

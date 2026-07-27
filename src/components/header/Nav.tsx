@@ -8,7 +8,7 @@ export default function Nav() {
   const pathname = usePathname();
 
   return (
-    <ul className="hidden items-center gap-1 lg:flex">
+    <ul className="hidden items-center gap-7 lg:flex">
       {navLinks.map(({ href, label, icon: Icon }) => {
         const isActive = pathname === href;
 
@@ -17,13 +17,13 @@ export default function Nav() {
             <Link
               href={href}
               aria-current={isActive ? "page" : undefined}
-              className={`flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition-colors ${
+              className={`flex items-center gap-2 border-b-2 pb-1 text-sm transition-colors ${
                 isActive
-                  ? "bg-zinc-900 text-white dark:bg-white dark:text-zinc-900"
-                  : "text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-zinc-100"
+                  ? "border-zinc-900 font-medium text-zinc-900 dark:border-zinc-100 dark:text-zinc-100"
+                  : "border-transparent text-zinc-500 hover:border-zinc-300 hover:text-zinc-900 dark:text-zinc-400 dark:hover:border-zinc-600 dark:hover:text-zinc-100"
               }`}
             >
-              <Icon size={16} aria-hidden="true" />
+              <Icon size={15} aria-hidden="true" />
               {label}
             </Link>
           </li>

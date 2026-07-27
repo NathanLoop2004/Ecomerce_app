@@ -26,7 +26,7 @@ export default function ProductCard({
   const hasDiscount = product.discountPercentage > 0;
 
   return (
-    <article className="group flex w-full flex-col overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-sm transition duration-200 hover:-translate-y-1 hover:shadow-xl dark:border-zinc-800 dark:bg-zinc-900">
+    <article className="group relative flex w-full flex-col overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-sm transition duration-300 ease-out hover:z-10 hover:-translate-y-1.5 hover:scale-[1.03] hover:border-zinc-300 hover:shadow-2xl has-[a:active]:scale-[0.97] has-[a:active]:duration-100 motion-reduce:transition-none motion-reduce:hover:translate-y-0 motion-reduce:hover:scale-100 motion-reduce:has-[a:active]:scale-100 dark:border-zinc-800 dark:bg-zinc-900 dark:hover:border-zinc-700">
       <Link
         href={`/main/${product.id}`}
         className="flex flex-1 flex-col rounded-t-xl focus:outline-none focus-visible:ring-2 focus-visible:ring-zinc-900 dark:focus-visible:ring-white"
@@ -38,7 +38,7 @@ export default function ProductCard({
             fill
             sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
             priority={priority}
-            className="object-contain p-6 transition-transform duration-300 group-hover:scale-110"
+            className="object-contain p-6 transition-transform duration-500 ease-out group-hover:scale-110 motion-reduce:transition-none motion-reduce:group-hover:scale-100"
           />
 
           {hasDiscount && (

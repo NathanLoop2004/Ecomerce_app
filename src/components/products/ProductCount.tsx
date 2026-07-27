@@ -1,21 +1,19 @@
 "use client";
 
-import { useGetProductsQuery } from "@/store/api/productsApi";
+import { useProductQuery } from "@/store/api/useProductQuery";
+import type { ProductsQueryArgs } from "@/store/api/productsApi";
 
-export default function ProductCount({
-  limit = 20,
-  category,
-}: {
-  limit?: number;
-  category?: string;
-}) {
-  const { data } = useGetProductsQuery({ limit, category });
+export default function ProductCount(args: ProductsQueryArgs) {
+  const { products, total, isLoading } = useProductQuery(args);
 
-  if (data === undefined) return null;
+  if (isLoading || total === 0) return null;
+
+  const from = (args.skip ?? 0) + 1;
+  const to = Math.min((args.skip ?? 0) + products.length, total);
 
   return (
     <span className="text-sm text-zinc-500 dark:text-zinc-400">
-      {data.total} productos
+      {from}–{to} de {total} productos
     </span>
   );
 }

@@ -6,7 +6,7 @@ export default function MainPage() {
       <h1 className="mb-6 text-2xl font-semibold text-zinc-900 dark:text-zinc-100">
         Productos
       </h1>
-      <ProductList limit={20} />
+      <ProductList limit={12} />
     </div>
   );
 }

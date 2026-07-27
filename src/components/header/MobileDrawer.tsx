@@ -80,10 +80,10 @@ export default function MobileDrawer() {
                   href={href}
                   onClick={() => setIsOpen(false)}
                   aria-current={isActive ? "page" : undefined}
-                  className={`flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium transition-colors ${
+                  className={`flex items-center gap-3 border-l-2 px-4 py-3 text-sm transition-colors ${
                     isActive
-                      ? "bg-zinc-900 text-white dark:bg-white dark:text-zinc-900"
-                      : "text-zinc-700 hover:bg-zinc-100 dark:text-zinc-300 dark:hover:bg-zinc-800"
+                      ? "border-zinc-900 font-medium text-zinc-900 dark:border-zinc-100 dark:text-zinc-100"
+                      : "border-transparent text-zinc-500 hover:border-zinc-300 hover:text-zinc-900 dark:text-zinc-400 dark:hover:border-zinc-600 dark:hover:text-zinc-100"
                   }`}
                 >
                   <Icon size={18} aria-hidden="true" />
