@@ -3,6 +3,7 @@ import Link from "next/link";
 import { Star } from "lucide-react";
 import type { AvailabilityStatus, ProductSummary } from "@/interfaces";
 import { AddToCartButton } from "@/components/cart";
+import { FavoriteButton } from "@/components/favorites";
 
 const priceFormatter = new Intl.NumberFormat("en-US", {
   style: "currency",
@@ -27,6 +28,12 @@ export default function ProductCard({
 
   return (
     <article className="group relative flex w-full flex-col overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-sm transition duration-300 ease-out hover:z-10 hover:-translate-y-1.5 hover:scale-[1.03] hover:border-zinc-300 hover:shadow-2xl has-[a:active]:scale-[0.97] has-[a:active]:duration-100 motion-reduce:transition-none motion-reduce:hover:translate-y-0 motion-reduce:hover:scale-100 motion-reduce:has-[a:active]:scale-100 dark:border-zinc-800 dark:bg-zinc-900 dark:hover:border-zinc-700">
+      <FavoriteButton
+        productId={String(product.id)}
+        title={product.title}
+        className="absolute right-3 top-3 z-10"
+      />
+
       <Link
         href={`/main/${product.id}`}
         className="flex flex-1 flex-col rounded-t-xl focus:outline-none focus-visible:ring-2 focus-visible:ring-zinc-900 dark:focus-visible:ring-white"
@@ -48,7 +55,7 @@ export default function ProductCard({
           )}
 
           <span
-            className={`absolute right-3 top-3 rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide ring-1 ring-inset ${availabilityStyles[product.availabilityStatus]}`}
+            className={`absolute bottom-3 left-3 rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide ring-1 ring-inset ${availabilityStyles[product.availabilityStatus]}`}
           >
             {product.availabilityStatus}
           </span>
